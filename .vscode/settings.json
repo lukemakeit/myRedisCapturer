@@ -1,0 +1,16 @@
+{
+	"editor.formatOnSave": true,
+	"C_Cpp.clang_format_fallbackStyle": "Google",
+	"C_Cpp.default.cppStandard": "c++17",
+	"files.associations": {
+		"*.tcc": "cpp",
+		"ostream": "cpp",
+		"fstream": "cpp",
+		"iostream": "cpp",
+		"istream": "cpp",
+		"system_error": "cpp",
+		"typeinfo": "cpp",
+		"streambuf": "cpp",
+		"condition_variable": "cpp"
+	}
+}

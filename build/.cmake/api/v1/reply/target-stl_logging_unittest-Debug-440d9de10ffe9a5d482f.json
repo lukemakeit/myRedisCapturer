@@ -1,0 +1,175 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "glog/stl_logging_unittest"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_executable",
+			"target_link_libraries",
+			"add_definitions",
+			"target_compile_definitions"
+		],
+		"files" : 
+		[
+			"src/thirdparty/glog/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 666,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 670,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 445,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 688,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 693,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 683,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 678,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : " -g -O0 -lpcap  -g -fvisibility=hidden -fvisibility-inlines-hidden   -Wno-deprecated -std=gnu++1z"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 3,
+					"define" : "GLOG_NO_SYMBOLIZE_DETECTION"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "GLOG_STL_LOGGING_FOR_EXT_HASH"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "GLOG_STL_LOGGING_FOR_EXT_SLIST"
+				},
+				{
+					"backtrace" : 6,
+					"define" : "GLOG_STL_LOGGING_FOR_TR1_UNORDERED"
+				},
+				{
+					"backtrace" : 7,
+					"define" : "GLOG_STL_LOGGING_FOR_UNORDERED"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 2,
+					"path" : "/data/home/lukexwang/code/c++Code/myRedisCapture/build/glog"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "/data/home/lukexwang/code/c++Code/myRedisCapture/src/thirdparty/glog/src"
+				}
+			],
+			"language" : "CXX",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		}
+	],
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 2,
+			"id" : "glog::@2ffbeed1f4c9a932a5ab"
+		}
+	],
+	"id" : "stl_logging_unittest::@2ffbeed1f4c9a932a5ab",
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "-g -O0 -lpcap  -g",
+				"role" : "flags"
+			},
+			{
+				"fragment" : "-rdynamic",
+				"role" : "flags"
+			},
+			{
+				"fragment" : "libglogd.a -lpthread",
+				"role" : "libraries"
+			}
+		],
+		"language" : "CXX"
+	},
+	"name" : "stl_logging_unittest",
+	"nameOnDisk" : "stl_logging_unittest",
+	"paths" : 
+	{
+		"build" : "glog",
+		"source" : "src/thirdparty/glog"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "src/thirdparty/glog/src/stl_logging_unittest.cc",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "EXECUTABLE"
+}
