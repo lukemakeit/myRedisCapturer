@@ -10,7 +10,7 @@ redis可通过`monitor`命令获取执行的命令.
 
 ### 编译二进制
 ```shell
-cd build
+mkdir build && cd build
 cmake ..
 make
 ```
