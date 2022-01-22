@@ -19,7 +19,7 @@ int32_t main(int32_t argc, char* argv[]) {
                      0);
     cmd.add<std::string>("output-file", 'f', "store output into file path..",
                          false, "");
-    cmd.add<std::string>("log-file", 'e',
+    cmd.add<std::string>("log-file", '\0',
                          "store log info into file path.default ./capture.log",
                          false, "./capture.log");
     cmd.add<int32_t>("threads", 'n',

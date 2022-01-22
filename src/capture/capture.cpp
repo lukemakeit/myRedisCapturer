@@ -340,8 +340,8 @@ void Capture::outputCmds(std::shared_ptr<RedisAofDecoder> taskPtr) {
   std::lock_guard<std::mutex> lk(_out_mut);
   for (auto& ele : keepCmds) {
     _out_os << string_format(
-        "[%s] client: %s:%d => %s:%d %s multiBulkLen:%d "
-        "maxArgvSize:%d %s\n",
+        "[%s] client: %s:%d => %s:%d %s multiBulkLen: %d "
+        "maxArgvSize: %d %s\n",
         timeFormat, taskPtr->getSrcIP().c_str(), taskPtr->getSrcPort(),
         taskPtr->getDstIP().c_str(), taskPtr->getDstPort(), predix.c_str(),
         ele->multiCnt, ele->maxArgvSize,
