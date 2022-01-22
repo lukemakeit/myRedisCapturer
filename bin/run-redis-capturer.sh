@@ -14,14 +14,14 @@ usage() {
 	echo -e "Use libpcap to capture redis request packet and decode packet."
 	echo -e ""
 	echo -e "--help -h display help info"
-	echo -e "--device -d,network device. default eth1"
-	echo -e "--ip -i,redis (dst) ip.default the ip corresponding to eth1"
-	echo -e "--port -p,dst redis port. default the first 50* port in the /data/twemproxy directory"
-	echo -e "--timeout -t,duration of capture in seconds.default 0 (no limit)"
-	echo -e "--output-file -f,store output into file path.. default stdout"
-	echo -e "--only-big-req. default 0 means no limit.Only output requests that process multibulklen > {--only-big-req}, such as mset or mget or pipeline"
-	echo -e "--only-big-val. default 0 means no limit.only output write requests with a large value"
-	echo -e "--upgrade. refetch latest myRedisCapture binary."
+	echo -e "--device=string -d=string,network device. default eth1"
+	echo -e "--ip=string -i=string,redis (dst) ip.default the ip corresponding to eth1"
+	echo -e "--port=int -p,dst redis port. default the first 50* port in the /data/twemproxy directory"
+	echo -e "--timeout=int -t,duration of capture in seconds.default 0 (no limit)"
+	echo -e "--output-file=string -f,store output into file path.. default stdout"
+	echo -e "--only-big-req=int. default 0 means no limit.Only output requests that process multibulklen > {--only-big-req}, such as mset or mget or pipeline"
+	echo -e "--only-big-val=int. default 0 means no limit.only output write requests with a large value"
+	echo -e "--upgrade . refetch latest myRedisCapture binary."
 	exit 1
 }
 
@@ -84,10 +84,17 @@ if [[ -z $redisIP ]]; then
 	fi
 fi
 
+dataDir="/data/redis"
+if [[ ! -e "$dataDir" ]]; then
+	dataDir="/data1/redis"
+fi
 if [[ -z $redisPort ]]; then
 	redisPort=$(ls /data/twemproxy* | grep -P "^50" | head -1)
 	if [[ -z $redisPort ]]; then
-		echo -e "[ERROR] get the first 50* port in the /data/twemproxy directory fail"
+		redisPort=$(ls $dataDir | grep -P "^3" | head -1)
+	fi
+	if [[ -z $redisPort ]]; then
+		echo -e "[ERROR] get proxy/redis port fail"
 		exit -1
 	fi
 fi
@@ -108,7 +115,6 @@ fi
 if [[ -n $onlyBigVal ]]; then
 	onlyBigVal="--only-big-val=$onlyBigVal"
 fi
-
 # cd /data/dbbak/
 
 if [[ -n $upgrade && -e "./myRedisCapture" ]]; then
@@ -126,4 +132,5 @@ if [[ ! -e "./myRedisCapture" ]]; then
 fi
 
 echo -e "./myRedisCapture $device $redisIP $redisPort $timeout $outputFile $onlyBigReq $onlyBigVal"
+history -s "./myRedisCapture $device $redisIP $redisPort $timeout $outputFile $onlyBigReq $onlyBigVal"
 ./myRedisCapture $device $redisIP $redisPort $timeout $outputFile $onlyBigReq $onlyBigVal
