@@ -23,7 +23,7 @@ int32_t main(int32_t argc, char* argv[]) {
                          "store log info into file path.default ./capture.log",
                          false, "./capture.log");
     cmd.add<int32_t>("threads", 'n',
-                     "Number of threads parsing packets,default 4", false, 4);
+                     "Number of threads parsing packets,default 2", false, 2);
     cmd.add<int32_t>(
         "only-big-req", '\0',
         "default 0 means no limit.Only output requests that process "

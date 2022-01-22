@@ -61,7 +61,7 @@ class Capture {
   std::string getFilter();
   void pushTask(std::shared_ptr<RedisAofDecoder> task);
   void consumerTask();
-  void parallelConsumTasks();
+  void parallelConsumTasks(int32_t);
   void waitConsumers();
   void outputCmds(std::shared_ptr<RedisAofDecoder> taskPtr);
   bool checkTimeout(std::chrono::time_point<captureClock> begin) {
@@ -92,6 +92,7 @@ class Capture {
 
   int32_t _only_big_req;
   int32_t _only_big_val;
+  std::atomic<int> _packet_count_ac;
 
   std::shared_ptr<std::string> _err;
 };
