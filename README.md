@@ -40,7 +40,11 @@ make
 ./myRedisCapture --device=eth1 --ip=127.0.0.1 --port=6379 --timeout=30 --only-big-val=3000
 
 #示例3:只打印pipeline中命令个数超过 100 or keys个数超过 100的命令
-./myRedisCapture --device=eth1 --ip=127.0.0.1 --port=6379 --timeout=30 --only-big-req=100
+./myRedisCapture --device=eth1 --ip=127.0.0.1 --port=6379 --timeout=30 --only-big-req=100 --output-file=1.log
+#结合sort命令查看哪个 mget/mset/hmget/hmset 最大
+sort -k 9,9 -g -r 1.log |head -10
+#结合sort命令查看哪个写命令 value最大
+sort -k 11,11 -g -r 1.log |head -10
 ```
 ### 结果示例
 ![example01](./img/example01.png)

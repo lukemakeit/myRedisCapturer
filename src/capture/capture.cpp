@@ -304,9 +304,16 @@ void Capture::outputCmds(std::shared_ptr<RedisAofDecoder> taskPtr) {
   if (taskPtr->getAllCmds().empty()) {
     return;
   }
-  std::string predix("[NORMAL]");
-  if (taskPtr->getAllCmds().size() > 1) {
-    predix = "[PIPELINE]";
+  std::size_t cmdCount = taskPtr->getAllCmds().size();
+  std::vector<std::string> prefixList;
+  if (cmdCount == 1) {
+    prefixList.emplace_back("[NORMAL]");
+  } else {
+    char tmpStr[64] = {0};
+    for (std::size_t idx = 0; idx < cmdCount; idx++) {
+      snprintf(tmpStr, 64, "[PIPELINE-%d-%d]", idx + 1, cmdCount);
+      prefixList.emplace_back(tmpStr, strlen(tmpStr));
+    }
   }
   time_t reqTime = taskPtr->getReqTime();
   std::tm* ptm = std::localtime(&reqTime);
@@ -338,14 +345,16 @@ void Capture::outputCmds(std::shared_ptr<RedisAofDecoder> taskPtr) {
   }
 
   std::lock_guard<std::mutex> lk(_out_mut);
+  std::size_t idx = 0;
   for (auto& ele : keepCmds) {
     _out_os << string_format(
         "[%s] client: %s:%d => %s:%d %s multiBulkLen: %d "
         "maxArgvSize: %d %s\n",
         timeFormat, taskPtr->getSrcIP().c_str(), taskPtr->getSrcPort(),
-        taskPtr->getDstIP().c_str(), taskPtr->getDstPort(), predix.c_str(),
-        ele->multiCnt, ele->maxArgvSize,
+        taskPtr->getDstIP().c_str(), taskPtr->getDstPort(),
+        prefixList.at(idx).c_str(), ele->multiCnt, ele->maxArgvSize,
         stringsJoin(ele->cmdArgs, " ").c_str());
+    idx++;
   }
 }
 
