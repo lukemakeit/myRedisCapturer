@@ -1,3 +1,5 @@
+// Copyright [2022] <Copyright lukexwang@tencent.com>
+
 #include "redisCmd.h"
 
 #include "glog/logging.h"
@@ -16,7 +18,7 @@ std::shared_ptr<std::string> RedisCmdMeta::GetKeysAndCntAndMaxKey(
     if (last < 0) {
       last = last + cmd->cmdArgs.size();
     }
-    long maxLen = 0;
+    int maxLen = 0;
     for (int i = _firstKey; i <= last; i += _keyStep) {
       if (cmd->cmdArgs.at(i).size() > maxLen) {
         cmd->maxKey = cmd->cmdArgs.at(i);
@@ -63,7 +65,7 @@ std::shared_ptr<std::string> RedisCmdMeta::MaxValueAndValueCnt(
   if (_firstKey == 0) {
     return nullptr;
   }
-  long maxLen = 0;
+  int maxLen = 0;
   int last = _lastKey;
   if (last < 0) {
     last = last + cmd->cmdArgs.size();

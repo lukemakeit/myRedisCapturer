@@ -1,3 +1,5 @@
+// Copyright [2022] <Copyright lukexwang@tencent.com>
+
 #include "decoder.h"
 
 #include "glog/logging.h"
@@ -29,7 +31,7 @@ int RedisAofDecoder::run() {
           }
           if (!ss.tellg()) break;
           auto availLen = _payload.size() - ss.tellg();
-          int tmpBufSize = cmditem->bulkLen + 2;
+          auto tmpBufSize = cmditem->bulkLen + 2;
           if (tmpBufSize > availLen) {
             LOG(WARNING) << string_format(
                 "format not correct,partitial commands,expect %d "
@@ -37,9 +39,8 @@ int RedisAofDecoder::run() {
                 tmpBufSize, availLen);
             tmpBufSize = availLen;
           }
-          char tmpBuff[tmpBufSize];  // last byte is 0
-          memset(tmpBuff, 0, tmpBufSize);
-          ss.readsome(tmpBuff, tmpBufSize);
+          std::vector<char> tmpVec(tmpBufSize, 0);
+          ss.readsome(&tmpVec.front(), tmpBufSize);
           // if ((tmpBuff[cmditem->bulkLen] != '\r' ||
           //      tmpBuff[cmditem->bulkLen + 1] != '\n') &&
           //     (ss.eof() || ss.fail())) {
@@ -49,9 +50,10 @@ int RedisAofDecoder::run() {
           //       cmditem->bulkLen + 2, strlen(tmpBuff));
           //   break;
           // }
-          std::string item = redisNoRawStr(
-              tmpBuff, tmpBufSize < cmditem->bulkLen + 2 ? tmpBufSize
-                                                         : cmditem->bulkLen);
+          std::string item =
+              redisNoRawStr(&tmpVec.front(), tmpBufSize < cmditem->bulkLen + 2
+                                                 ? tmpBufSize
+                                                 : cmditem->bulkLen);
           cmditem->cmdArgs.emplace_back(std::move(item));
           if (tmpBufSize < cmditem->bulkLen + 2) {
             break;

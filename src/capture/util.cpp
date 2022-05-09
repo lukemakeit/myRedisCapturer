@@ -50,7 +50,7 @@ std::vector<std::string> stringSplit(const std::string &s, const char ch) {
  */
 std::string redisNoRawStr(const char *p, size_t len) {
   std::stringstream ss;
-  int bufSize = 20;
+  const int bufSize = 20;
   char buf[bufSize];
   ss << "\"";
   while (len--) {

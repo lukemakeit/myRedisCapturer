@@ -1,5 +1,7 @@
-#ifndef _MY_REDIS_CAPTURE_DECODER_H
-#define _MY_REDIS_CAPTURE_DECODER_H
+// Copyright [2022] <Copyright lukexwang@tencent.com>
+
+#ifndef MYREDISCAPTURER_CAPTURE_DECODER_H_
+#define MYREDISCAPTURER_CAPTURE_DECODER_H_
 
 #include <time.h>
 
@@ -10,10 +12,10 @@
 #include <vector>
 
 struct CmdItem {
-  long multiCnt;     // set a 1, multiCnt is 3
-  long bulkLen;      // $3\r\nset\r\n,bulkLen is 3
-  char msgType;      // '*' or '$'
-  long maxArgvSize;  // the max size of argvs in the command
+  int multiCnt;     // set a 1, multiCnt is 3
+  int bulkLen;      // $3\r\nset\r\n,bulkLen is 3
+  char msgType;     // '*' or '$'
+  int maxArgvSize;  // the max size of argvs in the command
 
   std::vector<std::string> cmdArgs;
   std::vector<std::string> cmdKeys;
@@ -42,7 +44,7 @@ class RedisAofDecoder {
   int getDstPort() const { return _dst_port; }
   time_t getReqTime() const { return _req_time; }
   const std::shared_ptr<std::string> getError() const { return _err; }
-  std::vector<std::shared_ptr<CmdItem>> &getAllCmds() { return _reqCmds; };
+  std::vector<std::shared_ptr<CmdItem>> &getAllCmds() { return _reqCmds; }
 
   int run();
 
@@ -58,4 +60,4 @@ class RedisAofDecoder {
   std::vector<std::shared_ptr<CmdItem>> _reqCmds;
 };
 
-#endif
+#endif  // MYREDISCAPTURER_CAPTURE_DECODER_H_

@@ -1,3 +1,5 @@
+// Copyright [2022] <Copyright lukexwang@tencent.com>
+
 #include <signal.h>
 
 #include "capture.h"

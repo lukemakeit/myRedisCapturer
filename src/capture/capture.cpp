@@ -1,3 +1,5 @@
+// Copyright [2022] <Copyright lukexwang@tencent.com>
+
 #include "capture.h"
 
 #include <arpa/inet.h>
@@ -247,7 +249,8 @@ void Capture::run() {
   pcap_stats(handle, &ps);
   LOG(INFO) << string_format(
       "packet loss: %3.6f%% total captured packets: %d\n",
-      (double)(100 * ps.ps_drop) / ps.ps_recv, _packet_count_ac.load());
+      static_cast<double>(100 * ps.ps_drop) / ps.ps_recv,
+      _packet_count_ac.load());
   pcap_close(handle);
 
   // additional 2 threads shorten consumption time
@@ -300,6 +303,10 @@ void Capture::waitConsumers() {
     }
   }
 }
+
+/*
+ * 打印请求命令
+ */
 void Capture::outputCmds(std::shared_ptr<RedisAofDecoder> taskPtr) {
   if (taskPtr->getAllCmds().empty()) {
     return;
@@ -371,7 +378,7 @@ void my_packet_handler(u_char* args, const struct pcap_pkthdr* pkthdr,
   cap->_packet_count_ac.fetch_add(1);
   const struct ether_header* ethernetHeader;
   const struct ip* ipHeader;
-  unsigned short ipHeaderLen;
+  int ipHeaderLen;
   const struct tcphdr* tcpHeader;
   int totalHeadersSize;
   char sourceIp[INET_ADDRSTRLEN];
@@ -389,20 +396,20 @@ void my_packet_handler(u_char* args, const struct pcap_pkthdr* pkthdr,
 
     if (ipHeader->ip_p == IPPROTO_TCP) {
       ipHeaderLen = sizeof(struct ip);
-      tcpHeader =
-          (tcphdr*)(packet + sizeof(struct ether_header) + sizeof(struct ip));
+      tcpHeader = reinterpret_cast<const struct tcphdr*>(
+          packet + sizeof(struct ether_header) + sizeof(struct ip));
       sourcePort = ntohs(tcpHeader->source);
       destPort = ntohs(tcpHeader->dest);
       totalHeadersSize =
           sizeof(struct ether_header) + ipHeaderLen + tcpHeader->doff * 4;
 
       payloadLength = pkthdr->caplen - totalHeadersSize;
-      payload = (u_char*)(packet + totalHeadersSize);
+      payload = const_cast<u_char*>(packet + totalHeadersSize);
       if (payloadLength > 0) {
         auto decoderTask = std::make_shared<RedisAofDecoder>(
-            std::string(sourceIp), int(sourcePort), std::string(destIp),
-            int(destPort), std::string((char*)payload, payloadLength),
-            pkthdr->ts.tv_sec);
+            std::string(sourceIp), static_cast<int>(sourcePort),
+            std::string(destIp), static_cast<int>(destPort),
+            std::string((char*)payload, payloadLength), pkthdr->ts.tv_sec);
         cap->pushTask(decoderTask);
       }
     }

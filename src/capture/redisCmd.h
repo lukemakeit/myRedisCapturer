@@ -1,5 +1,7 @@
-#ifndef _MY_REDIS_CAPTURE_REDIS_CMD_H
-#define _MY_REDIS_CAPTURE_REDIS_CMD_H
+// Copyright [2022] <Copyright lukexwang@tencent.com>
+
+#ifndef MYREDISCAPTURER_CAPTURE_REDISCMD_H_
+#define MYREDISCAPTURER_CAPTURE_REDISCMD_H_
 
 #include <memory>
 #include <mutex>
@@ -36,4 +38,4 @@ inline std::shared_ptr<std::unordered_map<std::string, RedisCmdMeta>>
 void initRedisCommandTable();
 const std::shared_ptr<std::unordered_map<std::string, RedisCmdMeta>>
 GetRedisCommandTable();
-#endif
+#endif  // MYREDISCAPTURER_CAPTURE_REDISCMD_H_

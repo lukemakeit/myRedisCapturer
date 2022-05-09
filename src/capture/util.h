@@ -1,5 +1,7 @@
-#ifndef _MY_REDIS_CAPTURE_UTIL_H
-#define _MY_REDIS_CAPTURE_UTIL_H
+// Copyright [2022] <Copyright lukexwang@tencent.com>
+
+#ifndef MYREDISCAPTURER_CAPTURE_UTIL_H_
+#define MYREDISCAPTURER_CAPTURE_UTIL_H_
 #include <ctype.h>
 #include <string.h>
 
@@ -54,4 +56,4 @@ std::string string_format(const std::string &format, Args... args) {
  * Refer to the implementation of sdscatrepr() in redis
  */
 std::string redisNoRawStr(const char *p, size_t len);
-#endif
+#endif  // MYREDISCAPTURER_CAPTURE_UTIL_H_
