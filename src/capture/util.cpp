@@ -1,3 +1,5 @@
+// Copyright [2022] <Copyright lukexwang@tencent.com>
+
 #include "util.h"
 
 static void ltrimSpace(std::string &s) {

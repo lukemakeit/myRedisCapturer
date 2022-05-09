@@ -1,7 +1,7 @@
 // Copyright [2022] <Copyright lukexwang@tencent.com>
 
-#ifndef _MY_REDIS_CAPTURE_CAPTURE_H
-#define _MY_REDIS_CAPTURE_CAPTURE_H
+#ifndef MYREDISCAPTURER_CAPTURE_CAPTURE_H_
+#define MYREDISCAPTURER_CAPTURE_CAPTURE_H_
 
 #include <atomic>
 #include <chrono>
@@ -99,4 +99,4 @@ class Capture {
   std::shared_ptr<std::string> _err;
 };
 
-#endif
+#endif  // MYREDISCAPTURER_CAPTURE_CAPTURE_H_

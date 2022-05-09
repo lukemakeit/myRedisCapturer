@@ -409,7 +409,8 @@ void my_packet_handler(u_char* args, const struct pcap_pkthdr* pkthdr,
         auto decoderTask = std::make_shared<RedisAofDecoder>(
             std::string(sourceIp), static_cast<int>(sourcePort),
             std::string(destIp), static_cast<int>(destPort),
-            std::string((char*)payload, payloadLength), pkthdr->ts.tv_sec);
+            std::string(reinterpret_cast<char*>(payload), payloadLength),
+            pkthdr->ts.tv_sec);
         cap->pushTask(decoderTask);
       }
     }
