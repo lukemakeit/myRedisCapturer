@@ -169,20 +169,18 @@ std::string Capture::getFilter() {
       tmp.replace(pos, 1, " or ");
     }
 
-    snprintf(port_filter_buf, filter_buf_size, "tcp dst port (%s)",
-             tmp.c_str());
+    snprintf(port_filter_buf, filter_buf_size, "tcp port (%s)", tmp.c_str());
   } else if (_port.find('-') != std::string::npos) {
     // port contains '-': portrange "30000-30009"
-    snprintf(port_filter_buf, filter_buf_size, "tcp dst portrange %s",
+    snprintf(port_filter_buf, filter_buf_size, "tcp portrange %s",
              _port.c_str());
   } else {
     // one port "30000"
-    snprintf(port_filter_buf, filter_buf_size, "tcp dst port %s",
-             _port.c_str());
+    snprintf(port_filter_buf, filter_buf_size, "tcp port %s", _port.c_str());
   }
 
   if (!_ip.empty()) {
-    host_filter = " and dst host " + _ip;
+    host_filter = " and host " + _ip;
   }
   return port_filter_buf + host_filter;
 }
@@ -313,19 +311,31 @@ void Capture::outputCmds(std::shared_ptr<RedisAofDecoder> taskPtr) {
   }
   std::size_t cmdCount = taskPtr->getAllCmds().size();
   std::vector<std::string> prefixList;
+  std::string unknown_prefix = "";
   if (cmdCount == 1) {
     prefixList.emplace_back("[NORMAL]");
+    if (taskPtr->getAllCmds().at(0)->unknown_cmd) {
+      prefixList.at(0) = "[UNKNOWN]";
+    }
   } else {
     char tmpStr[64] = {0};
     for (std::size_t idx = 0; idx < cmdCount; idx++) {
-      snprintf(tmpStr, 64, "[PIPELINE-%d-%d]", idx + 1, cmdCount);
+      unknown_prefix = "";
+      if (taskPtr->getAllCmds().at(idx)->unknown_cmd) {
+        unknown_prefix = "[UNKNOWN]";
+      }
+      snprintf(tmpStr, 64, "[PIPELINE-%d-%d]%s", idx + 1, cmdCount,
+               unknown_prefix.c_str());
       prefixList.emplace_back(tmpStr, strlen(tmpStr));
     }
   }
-  time_t reqTime = taskPtr->getReqTime();
-  std::tm* ptm = std::localtime(&reqTime);
-  char timeFormat[32] = {0};
-  std::strftime(timeFormat, 32, "%Y-%m-%d %H:%M:%S", ptm);
+  timeval reqTime = taskPtr->getReqTime();
+  std::string timeFormat = timeval_to_str(reqTime);
+  timeval respTime = taskPtr->getRespTime();
+  // 计算从请求到响应的耗时，单位ms
+  timeval diff;
+  timersub(&respTime, &reqTime, &diff);
+  double costTime = diff.tv_sec * 1000.0 + diff.tv_usec / 1000.0;
 
   std::vector<std::shared_ptr<CmdItem>>& srcCmds = taskPtr->getAllCmds();
   std::vector<std::shared_ptr<CmdItem>> keepCmds;
@@ -356,12 +366,53 @@ void Capture::outputCmds(std::shared_ptr<RedisAofDecoder> taskPtr) {
   for (auto& ele : keepCmds) {
     _out_os << string_format(
         "[%s] client: %s:%d => %s:%d %s multiBulkLen: %d "
-        "maxArgvSize: %d %s\n",
-        timeFormat, taskPtr->getSrcIP().c_str(), taskPtr->getSrcPort(),
+        "maxArgvSize: %d cost_time: %.3fms %s %s\n",
+        timeFormat.c_str(), taskPtr->getSrcIP().c_str(), taskPtr->getSrcPort(),
         taskPtr->getDstIP().c_str(), taskPtr->getDstPort(),
-        prefixList.at(idx).c_str(), ele->multiCnt, ele->maxArgvSize,
+        prefixList.at(idx).c_str(), ele->multiCnt, ele->maxArgvSize, costTime,
+        taskPtr->simpleDecodeResp().c_str(),
         stringsJoin(ele->cmdArgs, " ").c_str());
     idx++;
+  }
+}
+
+void Capture::dealNetPacket(std::string&& src_ip, int src_port,
+                            std::string&& dst_ip, int dst_port,
+                            std::string&& payload, timeval t) {
+  std::string src_dst_addr = "";
+  std::string dst_src_addr = "";
+  src_dst_addr = src_ip + ":" + std::to_string(src_port) + "=>" + dst_ip + ":" +
+                 std::to_string(dst_port);
+  dst_src_addr = dst_ip + ":" + std::to_string(dst_port) + "=>" + src_ip + ":" +
+                 std::to_string(src_port);
+  // 如果 dst_ip == _ip and dst_port == _port，说明是请求包，否则是响应包
+  if (dst_ip == _ip && dst_port == std::stoi(_port)) {
+    // 请求包
+    // 如果 src_dst_addr 在 _decoder_map中存在,
+    // 则说明这个包是请求的一部分,从 _decoder_map 中取出对应的decoder,
+    // 并将 payload 追加到 decoder 的 payload 中;
+    // 如果 src_dst_addr 在 _decoder_map 中不存在,则说明这个包是一个新的请求,
+    // 创建一个新的decoder,并将 decoder 放入 _decoder_map 中
+    if (_decoder_map.find(src_dst_addr) != _decoder_map.end()) {
+      _decoder_map[src_dst_addr]->appendReqPayload(std::move(payload));
+    } else {
+      std::shared_ptr<RedisAofDecoder> decoderTask =
+          std::make_shared<RedisAofDecoder>(std::move(src_ip), src_port,
+                                            std::move(dst_ip), dst_port,
+                                            std::move(payload), t);
+      _decoder_map[src_dst_addr] = decoderTask;
+    }
+  } else if (src_ip == _ip && src_port == std::stoi(_port)) {
+    // 响应包
+    //  如果 dst_src_addr 在 _decoder_map中,
+    //  则说明client(地址是 dst_ip:dst_port)请求包已经发送完成,开始发送响应包
+    // 所以我们从 _decoder_map 中取出 decoder,加如到 decoder 队列中
+    if (_decoder_map.find(dst_src_addr) != _decoder_map.end()) {
+      _decoder_map[dst_src_addr]->setRespTime(t);
+      _decoder_map[dst_src_addr]->setRespPayload(std::move(payload));
+      pushTask(_decoder_map[dst_src_addr]);
+      _decoder_map.erase(dst_src_addr);
+    }
   }
 }
 
@@ -406,12 +457,18 @@ void my_packet_handler(u_char* args, const struct pcap_pkthdr* pkthdr,
       payloadLength = pkthdr->caplen - totalHeadersSize;
       payload = const_cast<u_char*>(packet + totalHeadersSize);
       if (payloadLength > 0) {
-        auto decoderTask = std::make_shared<RedisAofDecoder>(
+        // auto decoderTask = std::make_shared<RedisAofDecoder>(
+        //     std::string(sourceIp), static_cast<int>(sourcePort),
+        //     std::string(destIp), static_cast<int>(destPort),
+        //     std::string(reinterpret_cast<char*>(payload), payloadLength),
+        //     pkthdr->ts.tv_sec);
+        // cap->pushTask(decoderTask);
+        pkthdr->ts.tv_usec;
+        cap->dealNetPacket(
             std::string(sourceIp), static_cast<int>(sourcePort),
             std::string(destIp), static_cast<int>(destPort),
             std::string(reinterpret_cast<char*>(payload), payloadLength),
-            pkthdr->ts.tv_sec);
-        cap->pushTask(decoderTask);
+            pkthdr->ts);
       }
     }
   }

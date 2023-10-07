@@ -90,3 +90,12 @@ std::string redisNoRawStr(const char *p, size_t len) {
   ss << "\"";
   return ss.str();
 }
+
+std::string timeval_to_str(const struct timeval &tv) {
+  std::stringstream ss;
+  std::tm tm;
+  localtime_r(&tv.tv_sec, &tm);
+  ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << "." << std::setfill('0')
+     << std::setw(6) << tv.tv_usec;
+  return ss.str();
+}

@@ -4,8 +4,11 @@
 #define MYREDISCAPTURER_CAPTURE_UTIL_H_
 #include <ctype.h>
 #include <string.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <numeric>
@@ -56,4 +59,7 @@ std::string string_format(const std::string &format, Args... args) {
  * Refer to the implementation of sdscatrepr() in redis
  */
 std::string redisNoRawStr(const char *p, size_t len);
+
+std::string timeval_to_str(const struct timeval &tv);
+
 #endif  // MYREDISCAPTURER_CAPTURE_UTIL_H_

@@ -7,6 +7,9 @@
 
 std::shared_ptr<std::string> RedisCmdMeta::GetKeysAndCntAndMaxKey(
     std::shared_ptr<CmdItem> cmd) {
+  if (cmd->unknown_cmd) {
+    return nullptr;
+  }
   if (_sflags.find(ADMIN_FLAG) != std::string::npos) {
     return nullptr;
   }
@@ -56,6 +59,9 @@ MSET key1 Hello key2 World, then Hello and World are two values;
 */
 std::shared_ptr<std::string> RedisCmdMeta::MaxValueAndValueCnt(
     std::shared_ptr<CmdItem> cmd) {
+  if (cmd->unknown_cmd) {
+    return nullptr;
+  }
   if (_sflags.find(READONLY_FLAG) != std::string::npos) {
     return nullptr;
   }
@@ -138,9 +144,11 @@ void initRedisCommandTable() {
       std::make_shared<std::unordered_map<std::string, RedisCmdMeta>>();
   RedisCommandTable->insert({"module", {"module", -2, ADMIN_FLAG, 0, 0, 0}});
   RedisCommandTable->insert({"get", {"get", 2, READONLY_FLAG, 1, 1, 1}});
+  RedisCommandTable->insert({"getvsn", {"getvsn", 2, READONLY_FLAG, 1, 1, 1}});
   RedisCommandTable->insert({"getex", {"getex", -2, WRITE_FLAG, 1, 1, 1}});
   RedisCommandTable->insert({"getdel", {"getdel", 2, WRITE_FLAG, 1, 1, 1}});
   RedisCommandTable->insert({"set", {"set", -3, WRITE_FLAG, 1, 1, 1}});
+  RedisCommandTable->insert({"cas", {"cas", -3, WRITE_FLAG, 1, 1, 1}});
   RedisCommandTable->insert({"setnx", {"setnx", 3, WRITE_FLAG, 1, 1, 1}});
   RedisCommandTable->insert({"setex", {"setex", 4, WRITE_FLAG, 1, 1, 1}});
   RedisCommandTable->insert({"psetex", {"psetex", 4, WRITE_FLAG, 1, 1, 1}});
@@ -262,9 +270,13 @@ void initRedisCommandTable() {
       {"zrandmember", {"zrandmember", -2, READONLY_FLAG, 1, 1, 1}});
   RedisCommandTable->insert({"hset", {"hset", -4, WRITE_FLAG, 1, 1, 1}});
   RedisCommandTable->insert({"hsetnx", {"hsetnx", 4, WRITE_FLAG, 1, 1, 1}});
+  RedisCommandTable->insert({"hmcas", {"hmcas", -4, WRITE_FLAG, 1, 1, 1}});
+  RedisCommandTable->insert({"hmcasv2", {"hmcasv2", -4, WRITE_FLAG, 1, 1, 1}});
   RedisCommandTable->insert({"hget", {"hget", 3, READONLY_FLAG, 1, 1, 1}});
   RedisCommandTable->insert({"hmset", {"hmset", -4, WRITE_FLAG, 1, 1, 1}});
   RedisCommandTable->insert({"hmget", {"hmget", -3, READONLY_FLAG, 1, 1, 1}});
+  RedisCommandTable->insert(
+      {"hmgetvsn", {"hmgetvsn", -3, READONLY_FLAG, 1, 1, 1}});
   RedisCommandTable->insert({"hincrby", {"hincrby", 4, WRITE_FLAG, 1, 1, 1}});
   RedisCommandTable->insert(
       {"hincrbyfloat", {"hincrbyfloat", 4, WRITE_FLAG, 1, 1, 1}});

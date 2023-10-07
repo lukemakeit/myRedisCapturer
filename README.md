@@ -45,6 +45,8 @@ make
 sort -k 9,9 -g -r 1.log |head -10
 #结合sort命令查看哪个写命令 value最大
 sort -k 11,11 -g -r 1.log |head -10
+#结合sort 命令看哪个命令耗时最严重
+sort -k 13,13 -g -r 1.log |head -10
 ```
 ### 结果示例
 ![example01](./img/example01.png)

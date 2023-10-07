@@ -9,6 +9,7 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -72,6 +73,8 @@ class Capture {
             .count();
     return useSec > _timeout;
   }
+  void dealNetPacket(std::string&& src_ip, int src_port, std::string&& dst_ip,
+                     int dst_port, std::string&& payload, timeval t);
 
  private:
   std::string _device;
@@ -86,6 +89,7 @@ class Capture {
   std::mutex _decoder_mut;
   std::condition_variable _decoder_cond;
   std::queue<std::shared_ptr<RedisAofDecoder>> _decoder_queue;
+  std::map<std::string, std::shared_ptr<RedisAofDecoder>> _decoder_map;
   std::vector<std::thread> _threeads_list;
 
   std::ofstream _out_of;
