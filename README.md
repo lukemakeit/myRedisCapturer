@@ -4,7 +4,7 @@ redis可通过`monitor`命令获取执行的命令.
 该工具通过libpcap库完成网络抓包,同时根据resp格式解析请求命令，将命令进行输出。
 
 ### 环境介绍
-- Tlinux 2.2+
+- Centos 7
 - CMake 3.13.0+
 - C++ 17
 
@@ -33,6 +33,9 @@ make
 
 ### 使用示例
 ```sh
+# 示例1:打印所有命令到终端
+./myRedisCapture --device=eth1 --ip=127.0.0.1 --port=6379 --timeout=0
+
 #示例1:打印所有命令到 1.log
 ./myRedisCapture --device=eth1 --ip=127.0.0.1 --port=6379 --timeout=30 --output-file=1.log
 
@@ -49,7 +52,7 @@ sort -k 11,11 -g -r 1.log |head -10
 sort -k 13,13 -g -r 1.log |head -10
 ```
 ### 结果示例
-![example01](./img/example01.png)
+![example01](./img/myRedisCapture-example01.png)
 
 ### 关于libpcap
 关于libpcap的使用建议参考:
